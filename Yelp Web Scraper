@@ -1,0 +1,41 @@
+from textblob import TextBlob
+from flask import Flask
+import requests
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+
+#Try the following input: https://yelp-sentiment-scraper.gunnellevan.repl.co/sentiment/Yi%20Fang%20Taiwan%20fruit%20tea/west%20los%20angeles
+
+
+@app.route("/sentiment/<name>/<location>")
+def get_sentiment_analysis(name, location):
+    newURL = "https://www.yelp.com/biz/" + name + "-" + location
+    newURL = newURL.replace(" ", "-")
+    print(newURL)
+    page = requests.get(newURL)
+
+    message = str(page.content)
+    n = ""
+    score = 0
+    count = 1
+    while ': {"text":' in message and ', "language": "en"},' in message:
+        index1 = message.index(': {"text":') + 10
+        index2 = message.index(', "language": "en"},')
+        s = message[index1:index2]
+        text = TextBlob(s)
+        score += text.sentiment.polarity
+        count += 1
+        message = message[index2 + 11:]
+    m = score/count
+    if m > 0:
+      n="Positive"
+    elif m == 0:
+      n="Neutral"
+    elif m < 0:
+      n="Negative"
+    return "The Sentiment average score was:" + n
+
+
+app.run(host='0.0.0.0')
