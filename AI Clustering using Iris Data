@@ -1,0 +1,41 @@
+from sklearn.cluster import KMeans
+
+import matplotlib.pyplot as plt
+
+import pandas as pandas
+
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import cross_val_score
+
+dataset = pandas.read_csv("Iris.csv")
+
+input_value = dataset[['PetalLengthCm', 'PetalWidthCm']]
+output_value = dataset[['Species']]
+
+le = LabelEncoder()
+yEncoded = le.fit_transform(output_value)
+plt.scatter(input_value['PetalLengthCm'],input_value['PetalWidthCm'], c = yEncoded, cmap = 'gist_rainbow')
+
+plt.xlabel("Sepal Length", fontsize =18)
+plt.ylabel("Sepal Width", fontsize = 18)
+
+plt.title("PL_PW_plot", fontsize = 18)
+plt.savefig("PL_PW_plot.png")
+
+
+model = KMeans(n_clusters = 3, random_state = 0)
+model.fit(input_value)
+new_labels = model.labels_
+
+plt.scatter(input_value['PetalLengthCm'],input_value['PetalWidthCm'], c = new_labels, cmap = 'gist_rainbow')
+
+plt.xlabel('Sepal Length', fontsize = 18)
+
+plt.ylabel('Sepal Width', fontsize = 18)
+
+
+plt.title("Predicted_PL_PW_plot", fontsize = 18)
+plt.savefig("Predicted_PL_PW_plot.png")
+
+score = cross_val_score(model, yEncoded, new_labels,cv = 3)
+print(score)
